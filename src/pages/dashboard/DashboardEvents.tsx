@@ -18,6 +18,16 @@ export default function DashboardEvents() {
   });
   const [eventErrors, setEventErrors] = useState<Partial<typeof eventForm>>({});
   const [submittingEvent, setSubmittingEvent] = useState(false);
+  const [promotedEvents, setPromotedEvents] = useState<string[]>([]);
+  const [promoting, setPromoting] = useState<string | null>(null);
+
+  const handlePromote = async (id: string, title: string) => {
+    setPromoting(id);
+    await new Promise(r => setTimeout(r, 1200));
+    setPromoting(null);
+    setPromotedEvents(prev => [...prev, id]);
+    toast.success(`"${title}" has been successfully promoted!`);
+  };
 
   const validateEvent = () => {
     const errs: Partial<typeof eventForm> = {};
@@ -138,7 +148,13 @@ export default function DashboardEvents() {
               </div>
               <div className="flex gap-2">
                 <button onClick={() => openEditModal(event)} className="btn-secondary text-sm py-2">Edit</button>
-                <button onClick={() => toast.success("Event promoted!")} className="btn-primary text-sm py-2">Promote</button>
+                <button 
+                  onClick={() => handlePromote(event.id, event.title)} 
+                  disabled={promotedEvents.includes(event.id) || promoting === event.id}
+                  className="btn-primary text-sm py-2 min-w-[90px] justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {promoting === event.id ? "Promoting..." : promotedEvents.includes(event.id) ? "Promoted" : "Promote"}
+                </button>
                 <Link to="/events" className="btn-secondary text-sm py-2">View Public</Link>
               </div>
             </div>

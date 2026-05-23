@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { cn } from "@/lib/utils";
 
@@ -35,8 +35,20 @@ const MOCK_MESSAGES: Message[] = [
 
 export default function DashboardMessages() {
   const [activeChat, setActiveChat] = useState<ChatSession>(MOCK_CHATS[1]);
-  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
+  const [messages, setMessages] = useState<Record<string, Message[]>>({
+    c1: [MOCK_MESSAGES[0]],
+    c2: MOCK_MESSAGES,
+    c3: [MOCK_MESSAGES[2], MOCK_MESSAGES[1]],
+  });
   const [inputText, setInputText] = useState("");
+  const [searchChat, setSearchChat] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, activeChat.id]);
+
+  const filteredChats = MOCK_CHATS.filter(c => c.name.toLowerCase().includes(searchChat.toLowerCase()));
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +63,10 @@ export default function DashboardMessages() {
       isMine: true,
     };
 
-    setMessages([...messages, newMsg]);
+    setMessages((prev) => ({
+      ...prev,
+      [activeChat.id]: [...(prev[activeChat.id] || []), newMsg]
+    }));
     setInputText("");
   };
 
@@ -68,13 +83,15 @@ export default function DashboardMessages() {
               </svg>
               <input 
                 type="text" 
+                value={searchChat}
+                onChange={(e) => setSearchChat(e.target.value)}
                 placeholder="Search messages..." 
                 className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {MOCK_CHATS.map((chat) => (
+            {filteredChats.map((chat) => (
               <button
                 key={chat.id}
                 onClick={() => setActiveChat(chat)}
@@ -131,7 +148,7 @@ export default function DashboardMessages() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map((msg) => (
+            {(messages[activeChat.id] || []).map((msg) => (
               <div key={msg.id} className={cn("flex flex-col max-w-[75%]", msg.isMine ? "ml-auto items-end" : "mr-auto items-start")}>
                 <div className={cn(
                   "px-4 py-2.5 rounded-2xl text-sm",
@@ -144,6 +161,7 @@ export default function DashboardMessages() {
                 <span className="text-[10px] text-slate-400 mt-1 mx-1">{msg.time}</span>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}

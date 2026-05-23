@@ -26,7 +26,7 @@ interface PaymentForm {
 }
 
 export default function DashboardBilling() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [tab, setTab] = useState<"overview" | "plans" | "invoices" | "payment-methods">("overview");
   const [cards, setCards] = useState<SavedCard[]>(INITIAL_CARDS);
   const [showAddCard, setShowAddCard] = useState(false);
@@ -42,6 +42,36 @@ export default function DashboardBilling() {
   const [exportingAll, setExportingAll] = useState(false);
 
   const currentPlan = PRICING_PLANS.find((p) => p.id === user?.plan) || PRICING_PLANS[0];
+
+  const userInvoices = [
+    {
+      id: "inv1",
+      invoiceNumber: "INV-2026-0520",
+      date: "2026-05-20",
+      dueDate: "2026-06-20",
+      amount: currentPlan.price,
+      status: "paid",
+      description: `${currentPlan.name} Plan - May 2026`,
+    },
+    {
+      id: "inv2",
+      invoiceNumber: "INV-2026-0420",
+      date: "2026-04-20",
+      dueDate: "2026-05-20",
+      amount: currentPlan.price,
+      status: "paid",
+      description: `${currentPlan.name} Plan - April 2026`,
+    },
+    {
+      id: "inv3",
+      invoiceNumber: "INV-2026-0320",
+      date: "2026-03-20",
+      dueDate: "2026-04-20",
+      amount: currentPlan.price,
+      status: "paid",
+      description: `${currentPlan.name} Plan - March 2026`,
+    }
+  ];
 
   const validateCard = () => {
     const errs: Partial<PaymentForm> = {};
@@ -85,6 +115,7 @@ export default function DashboardBilling() {
   const handleSwitchPlan = async (planId: string) => {
     setProcessingPayment(true);
     await new Promise((r) => setTimeout(r, 1500));
+    updateUser({ plan: planId });
     setProcessingPayment(false);
     setShowUpgradeModal(null);
     toast.success(`Successfully switched to ${PRICING_PLANS.find((p) => p.id === planId)?.name} plan!`);
@@ -207,7 +238,7 @@ export default function DashboardBilling() {
                 <button onClick={() => setTab("invoices")} className="text-sm text-primary-600 font-medium hover:text-primary-700">View all</button>
               </div>
               <div className="space-y-3">
-                {MOCK_INVOICES.map((inv) => (
+                {userInvoices.map((inv) => (
                   <div key={inv.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
                       <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -579,7 +610,7 @@ export default function DashboardBilling() {
             </button>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
-            {MOCK_INVOICES.map((inv) => (
+            {userInvoices.map((inv) => (
               <div key={inv.id} className="flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors flex-wrap gap-3">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useAuth } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -14,6 +16,12 @@ export default function DashboardSettings() {
   const [privacy, setPrivacy] = useState({ profilePublic: true, showEmail: false, showActivity: true });
   const [twoFA, setTwoFA] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Delete Account State
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Change Password State
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -204,9 +212,36 @@ export default function DashboardSettings() {
         </Section>
 
         <div className="flex justify-between items-center">
-          <button onClick={() => toast.error("This action is irreversible!", { description: "Contact support to delete your account" })} className="text-sm text-red-600 hover:text-red-700 font-medium">
-            Delete Account
-          </button>
+          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="text-sm text-red-600 hover:text-red-700 font-medium">Delete Account</button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete Account</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete your account? This action is irreversible. All your data, bookings, and active subscriptions will be permanently removed.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="sm:justify-between items-center flex-row mt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  disabled={deleting}
+                  onClick={async () => {
+                    setDeleting(true);
+                    await new Promise(r => setTimeout(r, 1500));
+                    logout();
+                    toast.success("Account deleted successfully");
+                    navigate("/register");
+                  }}
+                >
+                  {deleting ? "Deleting..." : "Yes, Delete Account"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <button onClick={handleSave} disabled={loading} className="btn-primary">
             {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</> : "Save Settings"}
           </button>

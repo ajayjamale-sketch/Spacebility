@@ -2,16 +2,34 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { MOCK_BOOKINGS } from "@/lib/data";
+import { MOCK_BOOKINGS, MOCK_WORKSPACES } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
 import { formatCurrency, formatShortDate, getStatusColor, cn } from "@/lib/utils";
 import type { Booking } from "@/types";
 
 const STATUS_FILTERS = ["All", "Confirmed", "Checked-in", "Completed", "Cancelled"];
 
 export default function DashboardBookings() {
+  const { user } = useAuth();
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
-  const [bookings, setBookings] = useState<Booking[]>(MOCK_BOOKINGS);
+  
+  const initialBookings = React.useMemo(() => {
+    return MOCK_BOOKINGS.filter((b) => {
+      if (user?.role === "owner") {
+        const ownedWorkspaceIds = MOCK_WORKSPACES.filter(w => w.ownerId === user.id).map(w => w.id);
+        return ownedWorkspaceIds.includes(b.workspaceId);
+      } else if (user?.role === "admin") {
+        return true;
+      }
+      return b.userId === user?.id;
+    });
+  }, [user]);
+
+  const [bookings, setBookings] = useState<Booking[]>(initialBookings);
+  
+  const isOwner = user?.role === "owner";
+  const title = isOwner ? "Workspace Bookings" : "My Bookings";
 
   const filtered = bookings.filter((b) => {
     const matchFilter = filter === "All" || b.status.toLowerCase() === filter.toLowerCase().replace("-", "-");
@@ -24,11 +42,16 @@ export default function DashboardBookings() {
     toast.success("Booking cancelled successfully");
   };
 
+  const handleCheckIn = (id: string) => {
+    setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: "checked-in" as const } : b));
+    toast.success("Successfully checked in!");
+  };
+
   return (
-    <DashboardLayout title="My Bookings">
+    <DashboardLayout title={title}>
       <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white font-display">My Bookings</h2>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white font-display">{title}</h2>
           <p className="text-slate-500 text-sm mt-1">{bookings.length} total bookings</p>
         </div>
         <Link to="/marketplace" className="btn-primary text-sm">
@@ -71,7 +94,10 @@ export default function DashboardBookings() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-bold text-slate-800 dark:text-white">{booking.workspaceName}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">{formatShortDate(booking.startDate)} · {booking.duration} · {booking.seats} seat{booking.seats > 1 ? "s" : ""}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      {formatShortDate(booking.startDate)} · {booking.duration} · {booking.seats} seat{booking.seats > 1 ? "s" : ""}
+                      {isOwner && ` · Booked by: ${booking.userName}`}
+                    </p>
                     <p className="text-xs text-slate-400 mt-1 font-mono">{booking.bookingCode}</p>
                   </div>
                   <span className={cn("text-xs px-3 py-1.5 rounded-full font-semibold flex-shrink-0", getStatusColor(booking.status))}>{booking.status}</span>
@@ -84,7 +110,7 @@ export default function DashboardBookings() {
                       <button onClick={() => handleCancel(booking.id)} className="text-sm text-red-600 hover:text-red-700 font-medium px-4 py-2 rounded-xl border-2 border-red-200 hover:border-red-300 transition-all">Cancel</button>
                     )}
                     {booking.status === "confirmed" && (
-                      <button className="btn-primary text-sm py-2 px-4">Check In</button>
+                      <button onClick={() => handleCheckIn(booking.id)} className="btn-primary text-sm py-2 px-4">Check In</button>
                     )}
                   </div>
                 </div>

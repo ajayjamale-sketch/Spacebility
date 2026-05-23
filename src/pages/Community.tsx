@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -18,6 +18,23 @@ const GROUPS = [
 
 export default function Community() {
   const { isAuthenticated } = useAuth();
+  const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+
+  const handleJoinGroup = (name: string) => {
+    if (!joinedGroups.includes(name)) {
+      setJoinedGroups([...joinedGroups, name]);
+      toast.success(`Successfully joined ${name}!`);
+    }
+  };
+
+  const handleConnect = (id: string, name: string) => {
+    if (!connectedUsers.includes(id)) {
+      setConnectedUsers([...connectedUsers, id]);
+      toast.success(`Successfully connected with ${name}!`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
       <Navbar />
@@ -49,7 +66,17 @@ export default function Community() {
                     <span className="badge-accent mb-2">{group.category}</span>
                     <h3 className="font-bold text-slate-800 dark:text-white mb-1">{group.name}</h3>
                     <p className="text-sm text-slate-400 mb-4">{group.members.toLocaleString()} members</p>
-                    <button onClick={() => toast.success(`Joined ${group.name}!`)} className="btn-primary w-full justify-center text-sm py-2.5">Join Group</button>
+                    <button 
+                      onClick={() => handleJoinGroup(group.name)} 
+                      disabled={joinedGroups.includes(group.name)}
+                      className={cn("w-full justify-center text-sm py-2.5 rounded-xl font-semibold transition-all", 
+                        joinedGroups.includes(group.name) 
+                          ? "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 cursor-not-allowed" 
+                          : "btn-primary"
+                      )}
+                    >
+                      {joinedGroups.includes(group.name) ? "Joined" : "Join Group"}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -73,8 +100,16 @@ export default function Community() {
                     <p className="text-xs text-slate-400 truncate">{member.company || member.email}</p>
                     <span className={cn("text-xs px-2 py-0.5 rounded-md font-medium mt-1 inline-block", getRoleColor(member.role))}>{getRoleLabel(member.role)}</span>
                   </div>
-                  <button onClick={() => toast.success(`Connected with ${member.name}!`)} className="text-xs text-primary-600 font-medium border border-primary-200 dark:border-primary-700 px-3 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors flex-shrink-0">
-                    Connect
+                  <button 
+                    onClick={() => handleConnect(member.id, member.name)} 
+                    disabled={connectedUsers.includes(member.id)}
+                    className={cn("text-xs font-medium border px-3 py-1.5 rounded-lg transition-colors flex-shrink-0", 
+                      connectedUsers.includes(member.id) 
+                        ? "border-emerald-200 text-emerald-600 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-900/20 cursor-not-allowed" 
+                        : "text-primary-600 border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                    )}
+                  >
+                    {connectedUsers.includes(member.id) ? "Connected" : "Connect"}
                   </button>
                 </div>
               ))}

@@ -20,6 +20,20 @@ const MOCK_DOORS: Door[] = [
 
 export default function DashboardAccess() {
   const [doors, setDoors] = useState<Door[]>(MOCK_DOORS);
+  const [showFullLog, setShowFullLog] = useState(false);
+
+  const LOGS = [
+    { name: "John Doe", time: "10 mins ago", door: "Main Entrance", status: "success" },
+    { name: "Alice Smith", time: "25 mins ago", door: "Conference Room A", status: "success" },
+    { name: "Unknown User", time: "1 hour ago", door: "Private Office 101", status: "failed" },
+    { name: "Bob Johnson", time: "2 hours ago", door: "Main Entrance", status: "success" },
+    { name: "Sarah Connor", time: "3 hours ago", door: "Coworking Space 1", status: "success" },
+    { name: "Unknown User", time: "5 hours ago", door: "Main Entrance", status: "failed" },
+    { name: "Jane Smith", time: "6 hours ago", door: "Conference Room A", status: "success" },
+    { name: "Mike Ross", time: "8 hours ago", door: "Private Office 101", status: "success" },
+  ];
+
+  const visibleLogs = showFullLog ? LOGS : LOGS.slice(0, 4);
 
   const toggleLock = (id: string) => {
     setDoors(doors.map(door => {
@@ -134,12 +148,7 @@ export default function DashboardAccess() {
           <div className="card p-6">
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Recent Access Logs</h3>
             <div className="space-y-4">
-              {[
-                { name: "John Doe", time: "10 mins ago", door: "Main Entrance", status: "success" },
-                { name: "Alice Smith", time: "25 mins ago", door: "Conference Room A", status: "success" },
-                { name: "Unknown User", time: "1 hour ago", door: "Private Office 101", status: "failed" },
-                { name: "Bob Johnson", time: "2 hours ago", door: "Main Entrance", status: "success" },
-              ].map((log, i) => (
+              {visibleLogs.map((log, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
@@ -162,7 +171,12 @@ export default function DashboardAccess() {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-4 text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">View Full Log →</button>
+            <button 
+              onClick={() => setShowFullLog(!showFullLog)}
+              className="w-full mt-4 text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400"
+            >
+              {showFullLog ? "Show Less ↑" : "View Full Log →"}
+            </button>
           </div>
         </div>
       </div>

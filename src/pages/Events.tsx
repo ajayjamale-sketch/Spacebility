@@ -10,8 +10,17 @@ const EVENT_TYPES = ["All", "Networking", "Workshop", "Conference", "Meetup", "W
 
 export default function Events() {
   const [filter, setFilter] = useState("All");
+  const [eventsData, setEventsData] = useState(MOCK_EVENTS);
+  const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
 
-  const filtered = MOCK_EVENTS.filter((e) => filter === "All" || e.type === filter.toLowerCase());
+  const filtered = eventsData.filter((e) => filter === "All" || e.type === filter.toLowerCase());
+
+  const handleRegister = (id: string, title: string) => {
+    if (registeredEvents.includes(id)) return;
+    setRegisteredEvents(prev => [...prev, id]);
+    setEventsData(prev => prev.map(e => e.id === id ? { ...e, attendees: e.attendees + 1 } : e));
+    toast.success(`Successfully registered for ${title}!`);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
@@ -59,8 +68,16 @@ export default function Events() {
                         </div>
                         <p className="text-xs text-slate-400">{event.attendees}/{event.maxAttendees} attending</p>
                       </div>
-                      <button onClick={() => toast.success(`Registered for ${event.title}!`)} className="btn-primary text-sm py-2 px-4">
-                        {event.price === 0 ? "Register Free" : `Register · $${event.price}`}
+                      <button 
+                        onClick={() => handleRegister(event.id, event.title)} 
+                        disabled={registeredEvents.includes(event.id) || event.attendees >= event.maxAttendees}
+                        className="btn-primary text-sm py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {registeredEvents.includes(event.id) 
+                          ? "Registered" 
+                          : event.attendees >= event.maxAttendees 
+                            ? "Sold Out" 
+                            : event.price === 0 ? "Register Free" : `Register · $${event.price}`}
                       </button>
                     </div>
                   </div>

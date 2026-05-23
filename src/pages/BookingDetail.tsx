@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -8,7 +8,12 @@ import { formatCurrency, formatShortDate, formatTime, getStatusColor, cn } from 
 export default function BookingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const booking = MOCK_BOOKINGS.find((b) => b.id === id);
+  const [booking, setBooking] = useState(MOCK_BOOKINGS.find((b) => b.id === id) || null);
+  const [downloading, setDownloading] = useState(false);
+
+  useEffect(() => {
+    setBooking(MOCK_BOOKINGS.find((b) => b.id === id) || null);
+  }, [id]);
 
   if (!booking) {
     return (
@@ -88,11 +93,29 @@ export default function BookingDetail() {
         <div className="flex gap-3 flex-wrap">
           <Link to={`/marketplace/${booking.workspaceId}`} className="btn-secondary flex-1 justify-center">View Workspace</Link>
           {booking.status === "confirmed" && (
-            <button onClick={() => toast.success("Booking cancelled")} className="flex-1 py-3 px-5 rounded-xl border-2 border-red-200 text-red-600 font-semibold hover:border-red-300 transition-all">
+            <button 
+              onClick={() => {
+                setBooking({ ...booking, status: "cancelled" });
+                toast.success("Booking cancelled successfully");
+                setTimeout(() => navigate("/dashboard/bookings"), 1500);
+              }} 
+              className="flex-1 py-3 px-5 rounded-xl border-2 border-red-200 text-red-600 font-semibold hover:border-red-300 transition-all"
+            >
               Cancel Booking
             </button>
           )}
-          <button onClick={() => toast.info("Receipt downloaded!")} className="btn-primary flex-1 justify-center">Download Receipt</button>
+          <button 
+            onClick={async () => {
+              setDownloading(true);
+              await new Promise(r => setTimeout(r, 1200));
+              setDownloading(false);
+              toast.success("Receipt downloaded!");
+            }} 
+            disabled={downloading}
+            className="btn-primary flex-1 justify-center disabled:opacity-50"
+          >
+            {downloading ? "Downloading..." : "Download Receipt"}
+          </button>
         </div>
       </div>
     </DashboardLayout>

@@ -57,6 +57,7 @@ export default function DashboardCommunity() {
   const [eventErrors, setEventErrors] = useState<Partial<typeof eventForm>>({});
   const [submittingEvent, setSubmittingEvent] = useState(false);
   const [communityEvents, setCommunityEvents] = useState(MOCK_EVENTS.slice(0, 4));
+  const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
 
   // Discussion modal
   const [showDiscussionModal, setShowDiscussionModal] = useState(false);
@@ -154,6 +155,15 @@ export default function DashboardCommunity() {
     setShowEventModal(false);
     setEventForm({ title: "", date: "", time: "18:00", location: "", type: "networking", description: "", maxAttendees: "", price: "0" });
     toast.success("Event created successfully! Members will be notified.");
+  };
+
+  const handleRegisterEvent = (id: string, title: string) => {
+    if (registeredEvents.includes(id)) return;
+    setRegisteredEvents((prev) => [...prev, id]);
+    setCommunityEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, attendees: e.attendees + 1 } : e))
+    );
+    toast.success(`Registered for "${title}"!`);
   };
 
   // ── Discussion Logic ──
@@ -446,10 +456,11 @@ export default function DashboardCommunity() {
                     <span className="text-xs text-slate-400">{event.attendees}/{event.maxAttendees}</span>
                   </div>
                   <button
-                    onClick={() => toast.success(`Registered for "${event.title}"!`)}
-                    className="text-xs font-semibold px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                    onClick={() => handleRegisterEvent(event.id, event.title)}
+                    disabled={registeredEvents.includes(event.id) || event.attendees >= event.maxAttendees}
+                    className="text-xs font-semibold px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Register
+                    {registeredEvents.includes(event.id) ? "Registered" : "Register"}
                   </button>
                 </div>
               </div>
