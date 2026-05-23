@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -16,6 +17,7 @@ const GROUPS = [
 ];
 
 export default function Community() {
+  const { isAuthenticated } = useAuth();
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
       <Navbar />
@@ -25,7 +27,7 @@ export default function Community() {
             <h1 className="text-5xl font-bold font-display mb-4">Join the Spacebility Community</h1>
             <p className="text-xl text-slate-300 mb-8">50,000+ professionals connecting, collaborating, and growing together at workspaces around the world.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register" className="bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-primary-50">Join Now Free</Link>
+              <Link to={isAuthenticated ? "/dashboard" : "/register"} className="bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-primary-50">{isAuthenticated ? "Go to Dashboard" : "Join Now Free"}</Link>
               <Link to="/events" className="border-2 border-white/30 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/10">Browse Events</Link>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function Community() {
         <section className="py-20 bg-gradient-to-br from-primary-600 to-primary-800 text-white text-center px-4">
           <h2 className="text-3xl font-bold font-display mb-4">Ready to Connect?</h2>
           <p className="text-primary-200 mb-8">Join thousands of professionals already building meaningful connections through Spacebility.</p>
-          <Link to="/register" className="bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-primary-50">Join the Community</Link>
+          <Link to={isAuthenticated ? "/dashboard" : "/register"} className="bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-primary-50">{isAuthenticated ? "Go to Dashboard" : "Join the Community"}</Link>
         </section>
 
         <Footer />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import WorkspaceCard from "@/components/features/WorkspaceCard";
@@ -118,6 +119,7 @@ const TYPE_MAP: Record<string, string> = {
 };
 
 export default function Landing() {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -238,8 +240,8 @@ export default function Landing() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-              <Link to="/register" className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 font-semibold px-7 py-3.5 rounded-xl hover:bg-slate-50 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 text-sm">
-                Start for free
+              <Link to={isAuthenticated ? "/dashboard" : "/register"} className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 font-semibold px-7 py-3.5 rounded-xl hover:bg-slate-50 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 text-sm">
+                {isAuthenticated ? "Go to Dashboard" : "Start for free"}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
               <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl border border-white/25 hover:bg-white/10 transition-all duration-200 text-sm">
@@ -424,10 +426,10 @@ export default function Landing() {
 
           <div className="mt-14 text-center">
             <Link
-              to="/register"
+              to={isAuthenticated ? "/dashboard" : "/register"}
               className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 hover:shadow-lg active:scale-95 text-sm"
             >
-              Get started — it's free
+              {isAuthenticated ? "Go to Dashboard" : "Get started — it's free"}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </Link>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">No credit card required · Cancel anytime</p>
@@ -659,10 +661,10 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/register"
+              to={isAuthenticated ? "/dashboard" : "/register"}
               className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 font-semibold px-8 py-4 rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg active:scale-95 text-sm"
             >
-              Start for free today
+              {isAuthenticated ? "Go to Dashboard" : "Start for free today"}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </Link>
             <Link

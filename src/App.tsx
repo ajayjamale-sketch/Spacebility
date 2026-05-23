@@ -45,6 +45,8 @@ const DashboardUsers = lazy(() => import("@/pages/dashboard/DashboardUsers"));
 const DashboardReports = lazy(() => import("@/pages/dashboard/DashboardReports"));
 const DashboardEvents = lazy(() => import("@/pages/dashboard/DashboardEvents"));
 const DashboardNotifications = lazy(() => import("@/pages/dashboard/DashboardNotifications"));
+const DashboardAccess = lazy(() => import("@/pages/dashboard/DashboardAccess"));
+const DashboardMessages = lazy(() => import("@/pages/dashboard/DashboardMessages"));
 const BookingDetail = lazy(() => import("@/pages/BookingDetail"));
 const SubscriptionDetail = lazy(() => import("@/pages/SubscriptionDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -104,6 +106,8 @@ export default function App() {
         <Route path="/dashboard/users" element={<ProtectedRoute><DashboardUsers /></ProtectedRoute>} />
         <Route path="/dashboard/reports" element={<ProtectedRoute><DashboardReports /></ProtectedRoute>} />
         <Route path="/dashboard/notifications" element={<ProtectedRoute><DashboardNotifications /></ProtectedRoute>} />
+        <Route path="/dashboard/access" element={<ProtectedRoute><DashboardAccess /></ProtectedRoute>} />
+        <Route path="/dashboard/messages" element={<ProtectedRoute><DashboardMessages /></ProtectedRoute>} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
